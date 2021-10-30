@@ -120,11 +120,13 @@ void drawPlayerAsync(Player * player, bool * run, bool * hasChanged){
 }
 void movePlayerBackwards(Player * player, bool * run, bool * hasChanged){
 
-    int time = 2000;
+    int time = 1250;
     while (*run){
 
         delay(time);
 
+        time-=25;
+        std::cout << "Time: " << time << std::endl;
 
         player->setX(player->getX()-1);
 
