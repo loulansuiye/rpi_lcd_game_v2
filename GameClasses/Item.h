@@ -8,10 +8,12 @@
 
 class Item {
 private:
+    bool created;
     int x, y;
-    int type; //Boost, Time, Enemy
+    int type; //Boost=0, Time=1, Enemy=2
 
 public:
+    Item();
     Item(int x, int y, int type);
     ~Item();
 
@@ -27,6 +29,9 @@ public:
 
     void setType(int type);
 
+    bool isCreated() const;
+
+    void setCreated(bool created);
 };
 
 
