@@ -1,0 +1,6 @@
+# Project exclude paths
+/cmake-build-debug-remote-host/
+/cmake-build-debug-raspberrypi400/
+/.idea/
+/cmake-build-debug/
+/cmake-build-debug-visual-studio/
