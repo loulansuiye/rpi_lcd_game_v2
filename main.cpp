@@ -11,7 +11,6 @@
 
 
 #include "GameClasses/Player.h"
-#include "GameClasses/Enemy.h"
 
 int pcf8574_address = 0x27;        // PCF8574T:0x27, PCF8574AT:0x3F
 #define BASE 64         // BASE any number above 64

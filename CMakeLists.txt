@@ -3,7 +3,7 @@ project(rpi_lcd_game)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(rpi_lcd_game main.cpp GameClasses/Player.cpp GameClasses/Player.h GameClasses/Enemy.cpp GameClasses/Enemy.h)
+add_executable(rpi_lcd_game main.cpp GameClasses/Player.cpp GameClasses/Player.h)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
