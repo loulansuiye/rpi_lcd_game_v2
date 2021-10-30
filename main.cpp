@@ -90,27 +90,35 @@ int detectI2C(int addr){
     }
 }
 
-void drawPlayer(Player * p){
+void drawPlayerAsync(Player * player, bool * run, bool * hasChanged){
 
-    p->printStats();
+    while (*run) {
+        if (*hasChanged) {
 
-    lcdClear(lcdhd);
+            *hasChanged = false;
 
-    lcdPosition(lcdhd,p->getX() ,0);
-    writeCustomCharacter(0);
-    lcdPosition(lcdhd,p->getX() +1,0);
-    writeCustomCharacter(0);
+            player->printStats();
 
-    lcdPosition(lcdhd,p->getX() ,1);
-    writeCustomCharacter(0);
-    lcdPosition(lcdhd,p->getX() +1,1);
-    writeCustomCharacter(0);
-    lcdPosition(lcdhd,p->getX() ,p->getY() );
+            lcdClear(lcdhd);
 
-    writeCustomCharacter(1);
+            lcdPosition(lcdhd, player->getX(), 0);
+            writeCustomCharacter(0);
+            lcdPosition(lcdhd, player->getX() + 1, 0);
+            writeCustomCharacter(0);
 
+            lcdPosition(lcdhd, player->getX(), 1);
+            writeCustomCharacter(0);
+            lcdPosition(lcdhd, player->getX() + 1, 1);
+            writeCustomCharacter(0);
+            lcdPosition(lcdhd, player->getX(), player->getY());
+
+            writeCustomCharacter(1);
+
+        }
+    }
+    return;
 }
-void movePlayerBackwards(Player * player, bool * run){
+void movePlayerBackwards(Player * player, bool * run, bool * hasChanged){
 
     int time = 2000;
     while (*run){
@@ -125,14 +133,14 @@ void movePlayerBackwards(Player * player, bool * run){
             break;
         }
 
-        drawPlayer(player);
+        *hasChanged = true;
     }
 
     return;
 
 }
 
-void gameLoopAsync(Player * player, bool * run){
+void gameLoopAsync(Player * player, bool * run, bool * hasChanged){
     while (*run) {
 
         if (digitalRead(buttonPlayPin) == LOW) { //button is pressed
@@ -141,16 +149,18 @@ void gameLoopAsync(Player * player, bool * run){
             }else{
                 player->setY(0);
             }
-            drawPlayer(player);
-            printf("Press\n");
+            //drawPlayerAsync(player);
+            //printf("Press\n");
+            *hasChanged= true;
             delay(250);
         }
 
         if (digitalRead(buttonEndPin) == LOW) { //button is pressed
 
             player->setX(player->getX()+1);
+            *hasChanged= true;
 
-            drawPlayer(player);
+            //drawPlayerAsync(player);
             delay(250);
             //printf("End\n");
             //break;
@@ -200,8 +210,10 @@ int main(){
     lcdPosition(lcdhd,0,0);
     bool on = true;
     bool * run = &on;
+    bool changed = true;
+    bool * hasChanged = &changed;
 
-    Player * player = new Player();
+    Player * player = new Player(2,0);
 
     printTextToLCD("...");
     delay(500);
@@ -212,16 +224,18 @@ int main(){
     delay(1000);
     lcdClear(lcdhd);
     lcdPosition(lcdhd,0,0);
-    drawPlayer(player);
     delay(250);
 
-    std::thread gameLoopThread(gameLoopAsync, player, run);
+    std::thread gameLoopThread(gameLoopAsync, player, run, hasChanged);
 
-    std::thread backwardsThread(movePlayerBackwards, player, run);
+    std::thread drawThread(drawPlayerAsync, player, run, hasChanged);
+
+    std::thread backwardsThread(movePlayerBackwards, player, run, hasChanged);
 
 
     gameLoopThread.join();
     backwardsThread.join();
+    drawThread.join();
 
 
 

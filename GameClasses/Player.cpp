@@ -13,6 +13,15 @@ Player::Player() {
 
 }
 
+Player::Player(int x, int y) {
+
+    Player::health = 5;
+    Player::x = x;
+    Player::y = y;
+
+
+}
+
 Player::~Player() {
 }
 

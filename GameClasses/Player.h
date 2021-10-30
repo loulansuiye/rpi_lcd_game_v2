@@ -13,6 +13,7 @@ private:
     int y;
 public:
     Player();
+    Player(int x, int y);
     ~Player();
 
     int getHealth() const;
