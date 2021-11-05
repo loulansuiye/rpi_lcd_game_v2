@@ -106,14 +106,14 @@ void drawItems(bool *hasChanged) {
             if (items[i].isCreated()) {
                 lcdPosition(lcdhd, items[i].getX(), items[i].getY());
                 switch (items[i].getType()) {
-                    case 0:
-                        lcdPuts(lcdhd, "0");
+                    case 0: //Boost
+                        lcdPuts(lcdhd, ">");
                         break;
-                    case 1:
-                        lcdPuts(lcdhd, "1");
+                    case 1: //Health
+                        lcdPuts(lcdhd, "+");
                         break;
-                    case 2:
-                        lcdPuts(lcdhd, "2");
+                    case 2: //Enemy
+                        lcdPuts(lcdhd, "-");
                         break;
 
                 }
@@ -129,11 +129,27 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
     if (*hasChanged) {
 
 
+        int ph = player->getHealth();
         player->printStats();
+
 
         lcdClear(lcdhd);
 
-        lcdPosition(lcdhd, player->getX(), 0);
+        int phy = 1;
+
+        if(player->getX()<=3 && player->getY()==1){
+            phy=0;
+        }
+
+        lcdPosition(lcdhd, 0,phy);
+
+        std::string sh = "H:" + std::to_string(ph);
+
+        //const char * psh = "H:" + sh;
+
+        lcdPrintf(lcdhd, sh.c_str());
+
+        /*lcdPosition(lcdhd, player->getX(), 0);
         writeCustomCharacter(0);
         lcdPosition(lcdhd, player->getX() + 1, 0);
         writeCustomCharacter(0);
@@ -141,7 +157,7 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
         lcdPosition(lcdhd, player->getX(), 1);
         writeCustomCharacter(0);
         lcdPosition(lcdhd, player->getX() + 1, 1);
-        writeCustomCharacter(0);
+        writeCustomCharacter(0);*/
         lcdPosition(lcdhd, player->getX(), player->getY());
 
         writeCustomCharacter(1);
@@ -263,7 +279,7 @@ void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
         if (backTime > 200) {
             backTime -= 25;
         }
-        std::cout << "Time: " << time << std::endl;
+        std::cout << "Time: " << backTime << std::endl;
 
         createItem();
 
@@ -322,8 +338,10 @@ void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
 
         if (digitalRead(buttonEndPin) == LOW) { //button is pressed
 
-            player->setX(player->getX() + 1);
+            if(player->getX()<15){
 
+                player->setX(player->getX() + 1);
+            }
 
             checkForItem(player);
 
