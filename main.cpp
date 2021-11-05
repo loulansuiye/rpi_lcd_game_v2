@@ -33,6 +33,8 @@ int pcf8574_address = 0x27;        // PCF8574T:0x27, PCF8574AT:0x3F
 int lcdhd;// used to handle LCD
 Item items[ITEM_ARRAY_SIZE];
 int currentItem = 0;
+int backTime = 1250;
+
 
 void printTextToLCD(const char *s);
 
@@ -94,14 +96,14 @@ int detectI2C(int addr) {
     }
 }
 
-void drawItems(bool *hasChanged){
+void drawItems(bool *hasChanged) {
 
-    if(*hasChanged){
+    if (*hasChanged) {
 
 
         for (int i = 0; i < currentItem; ++i) {
 
-            if(items[i].isCreated()) {
+            if (items[i].isCreated()) {
                 lcdPosition(lcdhd, items[i].getX(), items[i].getY());
                 switch (items[i].getType()) {
                     case 0:
@@ -154,17 +156,40 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
 
 void createItem() {
 
-    int * type = new int;
-    int * x = new int;
-    int * y = new int;
+    int *type = new int;
+    int *x = new int;
+    int *y = new int;
 
-    int randType = rand()%4;
-    int randX = rand()%5+10;
-    int randY = rand()%2;
+    int randType = rand() % 4;
+    int randX = rand() % 10 + 3;
+    int randY = rand() % 2;
 
     *type = randType;
     *x = randX;
     *y = randY;
+    bool valid = false;
+    if(currentItem == 0){
+        valid = true;
+    }
+    while(!valid) {
+        for (int i = 0; i < currentItem; ++i) {
+
+            if (items[i].isCreated()) {
+                if ((*x == items[i].getX()) && (*y == items[i].getY())) {
+
+                    valid = false;
+                    *x = rand() % 10 + 3;
+                    *y = rand() % 2;
+
+                }else{
+                    valid = true;
+                }
+            } else {
+                valid = true;
+            }
+        }
+    }
+
 
     switch (*type) {
         case 0:
@@ -181,7 +206,7 @@ void createItem() {
             break;
     }
 
-    if(*type<4){
+    if (*type < 4) {
 
         items[currentItem].setX(*x);
         items[currentItem].setY(*y);
@@ -200,24 +225,50 @@ void createItem() {
     return;
 }
 
+void checkForItem(Player * player){
 
+    for (int i = 0; i < currentItem; ++i) {
+
+        if (items[i].isCreated()) {
+            if((player->getX() == items[i].getX()) && (player->getY() == items[i].getY())){
+                //Player has touched an item.
+
+                switch (items[i].getType()) {
+
+                    case 0: //boost
+                        backTime += 500;
+                        break;
+                    case 1: //health
+                        player->setHealth(player->getHealth()+1);
+                        break;
+                    case 2: //enemy
+                        player->setHealth(player->getHealth()-1);
+                        break;
+
+                }
+
+                items[i].setCreated(false);
+
+
+            }
+        }
+    }
+}
 void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
 
-    int time = 1250;
     while (*run) {
 
-        delay(time);
+        delay(backTime);
 
-        if(time>200) {
-            time -= 25;
+        if (backTime > 200) {
+            backTime -= 25;
         }
         std::cout << "Time: " << time << std::endl;
 
         createItem();
 
-
         player->setX(player->getX() - 1);
-
+        checkForItem(player);
         if (player->getX() < 0) {
             *run = false;
             break;
@@ -251,14 +302,20 @@ void drawLoopAsync(Player *player, bool *run, bool *hasChanged) {
 void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
     while (*run) {
 
+        if(player->getHealth() == 0){
+            *run = false;
+            break;
+        }
         if (digitalRead(buttonPlayPin) == LOW) { //button is pressed
             if (player->getY() == 0) {
                 player->setY(1);
             } else {
                 player->setY(0);
             }
-            //drawPlayer(player);
-            //printf("Press\n");
+
+
+            checkForItem(player);
+
             *hasChanged = true;
             delay(250);
         }
@@ -266,6 +323,10 @@ void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
         if (digitalRead(buttonEndPin) == LOW) { //button is pressed
 
             player->setX(player->getX() + 1);
+
+
+            checkForItem(player);
+
             *hasChanged = true;
 
             //drawPlayer(player);

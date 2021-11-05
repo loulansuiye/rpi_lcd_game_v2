@@ -55,3 +55,7 @@ void Player::printStats() {
               << "|Y: " << getY() << "          |" << std::endl
               << "|--------------|" << std::endl;
 }
+
+void Player::setHealth(int health) {
+    Player::health = health;
+}

@@ -16,6 +16,8 @@ public:
     Player(int x, int y);
     ~Player();
 
+    void setHealth(int health);
+
     int getHealth() const;
 
     int getX() const;
