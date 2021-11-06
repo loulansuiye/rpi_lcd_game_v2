@@ -216,7 +216,7 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
 
             lcdPosition(lcdhd, 0, smudge.getY());
 
-            lcdPrintf(lcdhd,"-------------");
+            lcdPrintf(lcdhd,"--------------");
 
             if(player->getY() == smudge.getY()){
                 *run = false;
