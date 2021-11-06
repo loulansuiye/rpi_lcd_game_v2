@@ -37,7 +37,7 @@ int lcdhd;// used to handle LCD
 int currentItem = 0;
 int backTime = 1250;
 bool fireLaser = false;
-
+bool lost = true;
 
 
 void printTextToLCD(const char *s);
@@ -540,6 +540,13 @@ int main() {
     theSmudgeThread.join();
 
 
+    lcdPosition(lcdhd, 0, 1);
+    if(lost){
+        lcdPrintf(lcdhd,"You died.");
+    }else {
+        lcdPrintf(lcdhd,"You Won!");
+
+    }
     printTextToLCD("End");
     delay(500);
     printTextToLCD("End.");
