@@ -12,6 +12,7 @@
 
 #include "GameClasses/Player.h"
 #include "GameClasses/Item.h"
+#include "GameClasses/Smudge.h"
 
 int pcf8574_address = 0x27;        // PCF8574T:0x27, PCF8574AT:0x3F
 #define BASE 64         // BASE any number above 64
@@ -30,10 +31,13 @@ int pcf8574_address = 0x27;        // PCF8574T:0x27, PCF8574AT:0x3F
 
 #define ITEM_ARRAY_SIZE 100
 
-int lcdhd;// used to handle LCD
+Smudge smudge;
 Item items[ITEM_ARRAY_SIZE];
+int lcdhd;// used to handle LCD
 int currentItem = 0;
 int backTime = 1250;
+bool fireLaser = false;
+
 
 
 void printTextToLCD(const char *s);
@@ -81,28 +85,31 @@ void makeCustomCharacters() {
     };
 
     unsigned char smudgeleft[] = {
-            0x11,
-            0x1B,
+            0x18,
+            0x0C,
+            0x07,
+            0x09,
             0x0E,
-            0x15,
-            0x1F,
-            0x11,
-            0x1F,
-            0x0E
+            0x0E,
+            0x0D,
+            0x07
     };
+
     unsigned char smudgeright[] = {
-            0x11,
-            0x1B,
-            0x0E,
-            0x15,
+            0x01,
+            0x06,
+            0x1C,
+            0x06,
             0x1F,
-            0x11,
             0x1F,
-            0x0E
+            0x0F,
+            0x1E
     };
     lcdCharDef(lcdhd, 0, empty);
     lcdCharDef(lcdhd, 1, player);
     lcdCharDef(lcdhd, 2, monster);
+    lcdCharDef(lcdhd, 3, smudgeleft);
+    lcdCharDef(lcdhd, 4, smudgeright);
 }
 
 void writeCustomCharacter(int pos) {
@@ -197,6 +204,26 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
         writeCustomCharacter(1);
 
         drawItems(hasChanged);
+
+        if(smudge.isAlive()){
+            lcdPosition(lcdhd, smudge.getX(), smudge.getY());
+            writeCustomCharacter(3);
+            lcdPosition(lcdhd, smudge.getX()+1, smudge.getY());
+            writeCustomCharacter(4);
+        }
+
+        if(fireLaser){
+
+            lcdPosition(lcdhd, 0, smudge.getY());
+
+            lcdPrintf(lcdhd,"-------------");
+
+            if(player->getY() == smudge.getY()){
+                *run = false;
+            }
+            smudge.setAlive(false);
+            fireLaser = false;
+        }
 
         *hasChanged = false;
     }
@@ -331,6 +358,45 @@ void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
 
 }
 
+void fireSmudgeLaser(bool *hasChanged){
+
+    delay(2000);
+
+
+    fireLaser = true;
+    *hasChanged = true;
+
+}
+
+
+void theGreatSmudgeAsync(Player *player, bool *run, bool *hasChanged){
+
+    while (*run){
+
+        delay(500);
+        int randSpawn = rand() % 3;
+
+        if(randSpawn<1){
+
+            /*
+            if(player->getX()>13){
+                player->setX(player->getX()+(player->getX()-15));
+            }*/
+
+            smudge.setAlive(true);
+            smudge.setY(player->getY());
+
+
+            fireSmudgeLaser(hasChanged);
+
+            *hasChanged = true;
+
+        }
+
+    }
+
+    return;
+}
 void drawLoopAsync(Player *player, bool *run, bool *hasChanged) {
 
     while (*run) {
@@ -372,9 +438,10 @@ void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
 
         if (digitalRead(buttonEndPin) == LOW) { //button is pressed
 
-            if(player->getX()<15){
+            if(player->getX()<13){
 
                 player->setX(player->getX() + 1);
+
             }
 
             checkForItem(player);
@@ -444,11 +511,13 @@ int main() {
     bool changed = true;
     bool *hasChanged = &changed;
 
+    smudge = Smudge();
+
     Player *player = new Player(2, 0);
 
     printTextToLCD("...");
     delay(500);
-    printTextToLCD("Start");
+    printTextToLCD("Smonk");
     delay(250);
     lcdPosition(lcdhd, 0, 1);
     lcdPuts(lcdhd, "By Ink");
@@ -463,10 +532,12 @@ int main() {
 
     std::thread backwardsThread(movePlayerBackwards, player, run, hasChanged);
 
+    std::thread theSmudgeThread(theGreatSmudgeAsync, player, run, hasChanged);
 
     gameLoopThread.join();
     backwardsThread.join();
     drawThread.join();
+    theSmudgeThread.join();
 
 
     printTextToLCD("End");
