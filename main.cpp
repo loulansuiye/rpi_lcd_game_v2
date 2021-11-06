@@ -79,6 +79,27 @@ void makeCustomCharacters() {
             0x1F,
             0x0E
     };
+
+    unsigned char smudgeleft[] = {
+            0x11,
+            0x1B,
+            0x0E,
+            0x15,
+            0x1F,
+            0x11,
+            0x1F,
+            0x0E
+    };
+    unsigned char smudgeright[] = {
+            0x11,
+            0x1B,
+            0x0E,
+            0x15,
+            0x1F,
+            0x11,
+            0x1F,
+            0x0E
+    };
     lcdCharDef(lcdhd, 0, empty);
     lcdCharDef(lcdhd, 1, player);
     lcdCharDef(lcdhd, 2, monster);
