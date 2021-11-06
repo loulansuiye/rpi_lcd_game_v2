@@ -68,8 +68,20 @@ void makeCustomCharacters() {
             0x0A,
             0x0A
     };
+
+    unsigned char monster[] = {
+            0x11,
+            0x1B,
+            0x0E,
+            0x15,
+            0x1F,
+            0x11,
+            0x1F,
+            0x0E
+    };
     lcdCharDef(lcdhd, 0, empty);
     lcdCharDef(lcdhd, 1, player);
+    lcdCharDef(lcdhd, 2, monster);
 }
 
 void writeCustomCharacter(int pos) {
@@ -113,7 +125,8 @@ void drawItems(bool *hasChanged) {
                         lcdPuts(lcdhd, "+");
                         break;
                     case 2: //Enemy
-                        lcdPuts(lcdhd, "-");
+                        writeCustomCharacter(2);
+                        //lcdPuts(lcdhd, "-");
                         break;
 
                 }
