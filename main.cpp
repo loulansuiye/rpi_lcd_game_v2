@@ -9,7 +9,6 @@
 #include <iostream>
 #include <thread>
 
-
 #include "GameClasses/Player.h"
 #include "GameClasses/Item.h"
 #include "GameClasses/Smudge.h"
@@ -39,13 +38,10 @@ int backTime = 1250;
 bool fireLaser = false;
 bool lost = true;
 
-
 void printTextToLCD(const char *s);
 
-
-//mine functions ^-^
+//my functions ^-^
 void printTextToLCD(const char *s) {
-
     lcdPosition(lcdhd, 0, 0);
     lcdPrintf(lcdhd, s);
 }
@@ -113,12 +109,8 @@ void makeCustomCharacters() {
 }
 
 void writeCustomCharacter(int pos) {
-
     lcdPutchar(lcdhd, pos);
-
 }
-//-
-
 
 int detectI2C(int addr) {
     int _fd = wiringPiI2CSetup(addr);
@@ -137,12 +129,8 @@ int detectI2C(int addr) {
 }
 
 void drawItems(bool *hasChanged) {
-
     if (*hasChanged) {
-
-
         for (int i = 0; i < currentItem; ++i) {
-
             if (items[i].isCreated()) {
                 lcdPosition(lcdhd, items[i].getX(), items[i].getY());
                 switch (items[i].getType()) {
@@ -156,17 +144,14 @@ void drawItems(bool *hasChanged) {
                         writeCustomCharacter(2);
                         //lcdPuts(lcdhd, "-");
                         break;
-
                 }
             }
 
         }
     }
-
 }
 
 void drawPlayer(Player *player, bool *run, bool *hasChanged) {
-
     if (*hasChanged) {
 
 
@@ -186,19 +171,8 @@ void drawPlayer(Player *player, bool *run, bool *hasChanged) {
 
         std::string sh = "H:" + std::to_string(ph);
 
-        //const char * psh = "H:" + sh;
-
         lcdPrintf(lcdhd, sh.c_str());
 
-        /*lcdPosition(lcdhd, player->getX(), 0);
-        writeCustomCharacter(0);
-        lcdPosition(lcdhd, player->getX() + 1, 0);
-        writeCustomCharacter(0);
-
-        lcdPosition(lcdhd, player->getX(), 1);
-        writeCustomCharacter(0);
-        lcdPosition(lcdhd, player->getX() + 1, 1);
-        writeCustomCharacter(0);*/
         lcdPosition(lcdhd, player->getX(), player->getY());
 
         writeCustomCharacter(1);
@@ -303,9 +277,7 @@ void createItem() {
 }
 
 void checkForItem(Player * player){
-
     for (int i = 0; i < currentItem; ++i) {
-
         if (items[i].isCreated()) {
             if((player->getX() == items[i].getX()) && (player->getY() == items[i].getY())){
                 //Player has touched an item.
@@ -325,14 +297,12 @@ void checkForItem(Player * player){
                 }
 
                 items[i].setCreated(false);
-
-
             }
         }
     }
 }
-void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
 
+void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
     while (*run) {
 
         delay(backTime);
@@ -350,39 +320,23 @@ void movePlayerBackwards(Player *player, bool *run, bool *hasChanged) {
             *run = false;
             break;
         }
-
         *hasChanged = true;
     }
-
     return;
-
 }
 
 void fireSmudgeLaser(bool *hasChanged){
-
     delay(2000);
-
-
     fireLaser = true;
     *hasChanged = true;
-
 }
-
 
 void theGreatSmudgeAsync(Player *player, bool *run, bool *hasChanged){
 
     while (*run){
-
         delay(500);
         int randSpawn = rand() % 3;
-
         if(randSpawn<1){
-
-            /*
-            if(player->getX()>13){
-                player->setX(player->getX()+(player->getX()-15));
-            }*/
-
             smudge.setAlive(true);
             smudge.setY(player->getY());
 
@@ -390,29 +344,18 @@ void theGreatSmudgeAsync(Player *player, bool *run, bool *hasChanged){
             fireSmudgeLaser(hasChanged);
 
             *hasChanged = true;
-
         }
-
     }
-
     return;
 }
+
 void drawLoopAsync(Player *player, bool *run, bool *hasChanged) {
-
     while (*run) {
-
         if (*hasChanged) {
-
-
             drawPlayer(player, run, hasChanged);
-
-
         }
-
     }
-
     return;
-
 }
 
 void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
@@ -439,27 +382,20 @@ void gameLoopAsync(Player *player, bool *run, bool *hasChanged) {
         if (digitalRead(buttonEndPin) == LOW) { //button is pressed
 
             if(player->getX()<13){
-
                 player->setX(player->getX() + 1);
-
             }
 
             checkForItem(player);
 
             *hasChanged = true;
 
-            //drawPlayer(player);
             delay(250);
-            //printf("End\n");
-            //break;
         }
-
     }
     return;
 }
 
 int main() {
-
     // Set randomizer string based on time
     srand(time(NULL));
 
@@ -539,14 +475,13 @@ int main() {
     drawThread.join();
     theSmudgeThread.join();
 
-
     lcdPosition(lcdhd, 0, 1);
     if(lost){
         lcdPrintf(lcdhd,"You died.");
     }else {
         lcdPrintf(lcdhd,"You Won!");
-
     }
+
     printTextToLCD("End");
     delay(500);
     printTextToLCD("End.");
@@ -557,7 +492,6 @@ int main() {
     delay(250);
     lcdClear(lcdhd);
     digitalWrite(LED, LOW);
-
 
     return 0;
 }
